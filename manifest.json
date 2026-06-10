@@ -1,0 +1,25 @@
+{
+  "name": "Sistema Júlio — Neurofeel",
+  "short_name": "Sist. Júlio",
+  "description": "Plano de 30 dias — Neurofeel",
+  "start_url": "/sistema-julio/",
+  "scope": "/sistema-julio/",
+  "display": "standalone",
+  "background_color": "#F7F6F2",
+  "theme_color": "#085041",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
