@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Júlio — Neurofeel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#1D9E75;--accent-light:#E1F5EE;--accent-dark:#085041;
+  --warn:#BA7517;--warn-light:#FAEEDA;
+  --danger:#A32D2D;--danger-light:#FCEBEB;
+  --bg:#F7F6F2;--surface:#FFFFFF;--border:#E4E2DA;--border-strong:#C8C6BC;
+  --text:#1A1A18;--text-2:#5A5A56;--text-3:#9A9890;
+  --radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+html{background:var(--bg);min-height:100vh}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);padding-bottom:48px}
+.top-bar{background:var(--accent-dark);padding:16px 20px;position:sticky;top:0;z-index:100}
+.top-inner{max-width:480px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{color:white;font-size:15px;font-weight:600;letter-spacing:-0.3px}
+.logo span{color:#5DCAA5;font-family:'DM Mono',monospace;font-size:11px;display:block;font-weight:400;letter-spacing:0.5px}
+.container{max-width:480px;margin:0 auto;padding:0 16px}
+.hero{padding:22px 0 16px}
+.hero-title{font-size:24px;font-weight:600;color:var(--text);letter-spacing:-0.5px;line-height:1.2}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:13px;color:var(--text-2);margin-top:5px;line-height:1.5}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;text-align:center}
+.stat-val{font-size:20px;font-weight:600;color:var(--accent);font-family:'DM Mono',monospace}
+.stat-label{font-size:10px;color:var(--text-3);margin-top:2px;line-height:1.3}
+.tabs{display:flex;gap:0;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tab{flex:1;padding:10px 4px;font-size:11px;font-weight:500;border:none;background:none;color:var(--text-2);cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;border-right:1px solid var(--border)}
+.tab:last-child{border-right:none}
+.tab.active{background:var(--accent);color:white}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+.card-header{padding:13px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent;gap:10px}
+.card-title{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.card-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+.card-body{border-top:1px solid var(--border)}
+.chevron{color:var(--text-3);font-size:16px;flex-shrink:0;transition:transform 0.2s}
+.day-block{padding:11px 15px;border-bottom:1px solid var(--border)}
+.day-block:last-child{border-bottom:none}
+.day-label{font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-family:'DM Mono',monospace}
+.task{display:flex;align-items:flex-start;gap:9px;padding:5px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.task-box{width:17px;height:17px;border:1.5px solid var(--border-strong);border-radius:5px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:white}
+.task-box.done{background:var(--accent);border-color:var(--accent)}
+.task-box.done::after{content:'✓';color:white;font-size:10px;font-weight:700}
+.task-text{font-size:12.5px;color:var(--text);line-height:1.5;flex:1}
+.task-text.done{color:var(--text-3);text-decoration:line-through}
+.tag{display:inline-block;font-size:9px;padding:2px 5px;border-radius:4px;margin-left:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;vertical-align:middle}
+.t-prod{background:#E1F5EE;color:#085041}.t-campo{background:#E6F1FB;color:#0C447C}
+.t-ment{background:#FAEEDA;color:#633806}.t-crm{background:#EEEDFE;color:#3C3489}
+.t-comm{background:#FAECE7;color:#712B13}.t-fray{background:#EAF3DE;color:#27500A}
+.t-ia{background:#F0E8FB;color:#4A1D8C}.t-hab{background:#FDE8F0;color:#8C1D4A}
+.meta-pill{background:var(--accent-light);border-radius:var(--radius-sm);padding:9px 13px;margin:10px 15px 13px;display:flex;align-items:flex-start;gap:7px}
+.meta-pill-text{font-size:12px;color:var(--accent-dark);font-weight:500;line-height:1.4}
+.week-prog{padding:8px 15px 0;display:flex;align-items:center;gap:8px}
+.prog-bar{flex:1;height:4px;background:var(--border);border-radius:2px}
+.prog-fill{height:4px;background:var(--accent);border-radius:2px;transition:width 0.3s}
+.prog-text{font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace}
+/* ALERT BOX */
+.alert-box{background:var(--danger-light);border:1px solid #E8B4B4;border-radius:var(--radius-sm);padding:10px 13px;margin:10px 15px 14px;display:flex;gap:8px;align-items:flex-start}
+.alert-box-text{font-size:12px;color:var(--danger);line-height:1.5;font-weight:500}
+/* FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.form-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:13px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.field{margin-bottom:13px}
+.field-label{font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;display:block}
+input[type=text],textarea,select{width:100%;padding:9px 11px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.15s;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:65px;line-height:1.5}
+.radio-row{display:flex;flex-wrap:wrap;gap:5px}
+.radio-opt{padding:5px 10px;border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text-2);background:var(--surface);transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.radio-opt.sel{background:var(--accent);border-color:var(--accent);color:white}
+.btn-primary{width:100%;padding:12px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity 0.15s}
+.btn-primary:active{opacity:0.85}
+.log-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:7px}
+.log-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.log-empresa{font-size:13px;font-weight:600;color:var(--text)}
+.log-date{font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace}
+.log-detail{font-size:12px;color:var(--text-2);line-height:1.6}
+.log-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;margin-right:3px}
+.badge-hot{background:#FCEBEB;color:#A32D2D}.badge-mid{background:#FAEEDA;color:#BA7517}.badge-cold{background:#E1F5EE;color:#085041}
+.empty{text-align:center;padding:36px 20px;color:var(--text-3)}
+.empty-icon{font-size:28px;margin-bottom:8px}.empty-text{font-size:13px}
+/* FRAY */
+.fray-rule{background:var(--danger-light);border:1px solid #E8B4B4;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px}
+.fray-rule-title{font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.fray-rule-text{font-size:12px;color:var(--danger);line-height:1.5}
+.fray-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px;margin-bottom:8px}
+.fray-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+.fray-title{font-size:13px;font-weight:600;color:var(--text);flex:1;padding-right:8px;line-height:1.3}
+.fray-prazo{font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace;margin-top:2px}
+.status-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.s-pend{background:var(--warn-light);color:var(--warn)}.s-done{background:var(--accent-light);color:var(--accent-dark)}
+.fray-bottom{display:flex;align-items:center;gap:8px}
+.fray-bottom label{font-size:12px;color:var(--text-2)}
+.grade-sel{width:80px;font-size:12px;padding:5px 7px}
+.strike-counter{background:var(--warn-light);border:1px solid #E8D4A0;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.strike-label{font-size:12px;color:var(--warn);font-weight:600}
+.strike-btns{display:flex;gap:6px}
+.strike-btn{padding:5px 12px;border:1px solid var(--warn);border-radius:20px;font-size:12px;color:var(--warn);background:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.strikes-display{display:flex;gap:4px;margin-top:6px}
+.strike-dot{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.strike-dot.red{background:var(--danger)}
+/* SOCIEDADE */
+.soc-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:9px;box-shadow:var(--shadow);transition:border-color 0.3s}
+.soc-step.achieved{border-color:var(--accent);border-left:4px solid var(--accent)}
+.soc-header{display:flex;align-items:flex-start;gap:11px}
+.step-circle{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace}
+.c-active{background:var(--accent);color:white}.c-locked{background:var(--border);color:var(--text-3)}.c-done{background:var(--accent-dark);color:white}
+.soc-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.soc-desc{font-size:11px;color:var(--text-2);line-height:1.4;margin-bottom:5px}
+.soc-reward{font-size:12px;font-weight:600;color:var(--accent)}
+.vendas-counter{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:11px;text-align:center;box-shadow:var(--shadow)}
+.counter-val{font-size:48px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;line-height:1}
+.counter-label{font-size:12px;color:var(--text-2);margin-top:5px;margin-bottom:14px}
+.counter-btns{display:flex;gap:8px}
+.btn-add{flex:2;padding:11px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-rem{flex:1;padding:11px;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text-2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.prog-row{margin-bottom:7px}
+.prog-label{display:flex;justify-content:space-between;margin-bottom:3px}
+.prog-label span{font-size:11px;color:var(--text-2)}
+.prog-label strong{font-size:11px;color:var(--accent);font-family:'DM Mono',monospace}
+.prog-track{height:5px;background:var(--border);border-radius:3px}
+.prog-fill2{height:5px;background:var(--accent);border-radius:3px;transition:width 0.4s}
+.section-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;font-family:'DM Mono',monospace}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-inner">
+    <div class="logo">Sistema Júlio<span>NEUROFEEL · INÍCIO 04/06/2026</span></div>
+    <div style="color:#5DCAA5;font-size:11px;font-family:'DM Mono',monospace" id="top-date"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-title">30 dias para <span>provar</span>.</div>
+    <div class="hero-sub">Início: 04/06 · Fray começa 10/06 · Sem pular etapa. Sem desculpa.</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val" id="stat-done">0</div><div class="stat-label">tarefas feitas</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-pct">0%</div><div class="stat-label">progresso</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-vendas">0</div><div class="stat-label">vendas</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('cronograma',this)">Plano</button>
+    <button class="tab" onclick="switchTab('checklist',this)">Campo</button>
+    <button class="tab" onclick="switchTab('fray',this)">Fray</button>
+    <button class="tab" onclick="switchTab('sociedade',this)">Sócio</button>
+  </div>
+
+  <!-- CRONOGRAMA -->
+  <div id="cronograma" class="section active">
+    <div class="section-label">Semanas 1–4 · toque para expandir</div>
+
+    <!-- SEMANA 1 -->
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="card-title">Semana 1 — Fundação</div>
+          <div class="card-meta">Produto, IA, identidade, hábitos. Base de tudo.</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="card-body" style="display:none">
+        <div class="week-prog">
+          <div class="prog-bar"><div class="prog-fill" style="width:0%" data-week="s1"></div></div>
+          <div class="prog-text" id="prog-s1">0%</div>
+        </div>
+
+        <div class="day-block">
+          <div class="day-label">Seg · Ter — Produto</div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Ler o playbook da Neurofeel inteiro — sem pular <span class="tag t-prod">produto</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Escrever com suas palavras: o que a Neurofeel FAZ e o que NÃO FAZ <span class="tag t-prod">produto</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Montar Matriz SWOT da Neurofeel focada em auditórios e igrejas (Marcelo explica, você monta sozinho) <span class="tag t-prod">produto</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Criar apresentação no Canva da Neurofeel para o nicho auditórios/igrejas (Marcelo orienta a estrutura) <span class="tag t-prod">produto</span></span></div>
+        </div>
+
+        <div class="day-block">
+          <div class="day-label">Qua — IA como ferramenta</div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Aula com Marcelo: como montar um prompt com contexto, cenário e output esperado <span class="tag t-ia">IA</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Criar prompt para simular cenários de possíveis clientes (pastor de igreja, gestor de auditório, diretor de escola) — A CHAVE <span class="tag t-ia">IA</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Rodar pelo menos 3 simulações de abordagem com a IA antes de ligar de verdade <span class="tag t-ia">IA</span></span></div>
+        </div>
+
+        <div class="day-block">
+          <div class="day-label">Qui — Hábitos & câmera</div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Listar 10 hábitos novos para começar agora — pequenos, diários, que somam (ex: acordar mais cedo, escova de dente com mão não dominante, 10 min de leitura...) <span class="tag t-hab">hábitos</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Gravar vídeo de 2–3 min falando sobre o dia — mesmo que péssimo, mesmo que não poste. Só para se acostumar com a câmera. <span class="tag t-comm">câmera</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Assistir Módulo 1 do Fray + entregar resumo escrito até quarta 19h <span class="tag t-fray">fray</span></span></div>
+        </div>
+
+        <div class="day-block">
+          <div class="day-label">Sex — Primeiras ligações</div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">5 ligações para igrejas/auditórios — só apresentar, sem forçar venda <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Preencher checklist de cada ligação (aba Campo) <span class="tag t-crm">crm</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Gravar vídeo da rotina do dia — o que fez, o que aprendeu <span class="tag t-comm">câmera</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s1')"><div class="task-box"></div><span class="task-text">Revisão com Marcelo: o que funcionou, o que ajustar <span class="tag t-ment">mentalidade</span></span></div>
+        </div>
+
+        <div class="meta-pill">
+          <div class="meta-pill-text">🎯 Meta: Canva pronto · SWOT pronta · 10 hábitos listados · 5 ligações feitas · 1 reunião agendada · vídeo gravado todo dia</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMANA 2 -->
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="card-title">Semana 2 — Volume de ligações + escuta ativa</div>
+          <div class="card-meta">10 ligações/dia. Perguntar mais, falar menos.</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="card-body" style="display:none">
+        <div class="week-prog">
+          <div class="prog-bar"><div class="prog-fill" style="width:0%" data-week="s2"></div></div>
+          <div class="prog-text" id="prog-s2">0%</div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Seg · Ter · Qua</div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">10 ligações por dia para igrejas / auditórios / escolas <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Usar IA para simular o perfil de cada cliente ANTES de ligar <span class="tag t-ia">IA</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Regra: fazer 2 perguntas ANTES de qualquer apresentação <span class="tag t-comm">comunicação</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Gravar pelo menos 1 ligação por dia para revisão própria <span class="tag t-comm">comunicação</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Gravar vídeo da rotina do dia <span class="tag t-comm">câmera</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Qui</div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Treinar pitch de elevador: 30 segundos sem enrolar <span class="tag t-comm">comunicação</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Ouvir as gravações — identificar onde falou demais <span class="tag t-comm">comunicação</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Assistir Módulo 2 e 3 do Fray + entregar resumos até quarta 19h <span class="tag t-fray">fray</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Sex</div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Mapear WhatsApp: quem pode indicar ou ser cliente? Listar nomes. <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Atualizar CRM com todos os leads da semana <span class="tag t-crm">crm</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s2')"><div class="task-box"></div><span class="task-text">Revisão com Marcelo — ajuste de abordagem <span class="tag t-ment">mentalidade</span></span></div>
+        </div>
+        <div class="meta-pill">
+          <div class="meta-pill-text">🎯 Meta: 50+ ligações · 3 reuniões agendadas · primo: reunião marcada</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMANA 3 -->
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="card-title">Semana 3 — Reuniões presenciais + objeções</div>
+          <div class="card-meta">Conduzir sem improvisar. Marcar próximo passo na hora.</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="card-body" style="display:none">
+        <div class="week-prog">
+          <div class="prog-bar"><div class="prog-fill" style="width:0%" data-week="s3"></div></div>
+          <div class="prog-text" id="prog-s3">0%</div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Seg</div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Estudar lista de quebra-gelos validados (Marcelo fornece) <span class="tag t-comm">comunicação</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Memorizar as 5 objeções mais comuns + respostas prontas <span class="tag t-prod">produto</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Usar IA para simular reunião com cliente difícil antes de ir a campo <span class="tag t-ia">IA</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Ter · Qua · Qui</div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">10 ligações/dia — foco em agendar reunião, não em vender por telefone <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Realizar reuniões agendadas — NUNCA sem slides preparados <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Regra: marcar próximo passo na hora. Nunca sair sem data. <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Gravar vídeo da rotina do dia <span class="tag t-comm">câmera</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Sex</div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Game de objeções com Marcelo: 10min, Marcelo ataca, você responde <span class="tag t-prod">produto</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Pedir indicação para 3 pessoas do WhatsApp pessoal <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s3')"><div class="task-box"></div><span class="task-text">Assistir Módulos 4 e 5 do Fray + entregar resumos até quarta 19h <span class="tag t-fray">fray</span></span></div>
+        </div>
+        <div class="meta-pill">
+          <div class="meta-pill-text">🎯 Meta: 2+ reuniões realizadas · 1 proposta enviada · primo: proposta ou fechamento</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMANA 4 -->
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="card-title">Semana 4 — Fechamento + CRM + redes sociais</div>
+          <div class="card-meta">Consistência provada. 1ª venda fechada.</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="card-body" style="display:none">
+        <div class="week-prog">
+          <div class="prog-bar"><div class="prog-fill" style="width:0%" data-week="s4"></div></div>
+          <div class="prog-text" id="prog-s4">0%</div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Seg · Ter · Qua</div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">10 ligações/dia + follow-up de todos os leads abertos <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Usar IA para preparar briefing antes de cada reunião <span class="tag t-ia">IA</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Auditar CRM: todo lead tem status, próximo passo e data? <span class="tag t-crm">crm</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Gravar vídeo da rotina do dia <span class="tag t-comm">câmera</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Qui</div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Primeiro post nas redes sociais: processo, aprendizados, rotina real <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Lançar para a rede pessoal: quem conhece igrejas, auditórios ou escolas? <span class="tag t-campo">campo</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Assistir Módulos 6, 7 e 8 do Fray + entregar resumos até quarta 19h <span class="tag t-fray">fray</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Sex — Revisão dos 30 dias</div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Apresentar para Marcelo: número de ligações, reuniões, propostas, vendas <span class="tag t-ment">mentalidade</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Avaliar: o que funcionou, o que quebrou, o que muda para os próximos 30 dias <span class="tag t-ment">mentalidade</span></span></div>
+          <div class="task" onclick="toggleTask(this,'s4')"><div class="task-box"></div><span class="task-text">Checagem dos degraus de sociedade: onde está? O que falta? <span class="tag t-ment">mentalidade</span></span></div>
+        </div>
+
+        <div class="alert-box">
+          <div class="alert-box-text">⚠️ Avaliação dos 30 dias: se não houver pelo menos 1 venda fechada ou pipeline sólido com datas, a parceria é revisada. Resultado conta, não esforço isolado.</div>
+        </div>
+
+        <div class="meta-pill">
+          <div class="meta-pill-text">🏁 Meta: 1 venda fechada · CRM completo · 4+ semanas de vídeo gravado · Fray em dia</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROTINA DIÁRIA -->
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div>
+          <div class="card-title">Rotina diária — todo dia, sem exceção</div>
+          <div class="card-meta">Hábitos + presença + desenvolvimento</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="card-body" style="display:none">
+        <div class="day-block">
+          <div class="day-label">Todo dia (seg a sab)</div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">📚 Ler pelo menos 5 páginas de livro <span class="tag t-ment">hábito</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">🎥 Gravar 1 vídeo do dia — qualquer coisa que estiver fazendo, sem perfeccionismo <span class="tag t-comm">câmera</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">🏋️ Ir à academia 1x <span class="tag t-ment">hábito</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">🧘 Aplicar 3 técnicas de mindfulness (respiração, pausa consciente, foco intencional) <span class="tag t-ment">hábito</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">❤️ Elogiar 1 pessoa próxima — genuíno, sem motivo obrigado <span class="tag t-ment">hábito</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Toda quarta (com Marcelo)</div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">Entrega das atividades do Fray até 19h <span class="tag t-fray">fray</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">Avaliação e correção das atividades pelo Marcelo <span class="tag t-fray">fray</span></span></div>
+        </div>
+        <div class="day-block">
+          <div class="day-label">Toda segunda (com Marcelo)</div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">Revisão da semana: o que gerou interesse, onde travou <span class="tag t-ment">mentalidade</span></span></div>
+          <div class="task" onclick="toggleTask(this,'rotina')"><div class="task-box"></div><span class="task-text">Ajuste de abordagem baseado nos dados reais da semana <span class="tag t-ment">mentalidade</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cronograma -->
+
+  <!-- CHECKLIST CAMPO -->
+  <div id="checklist" class="section">
+    <div class="section-label">Registro de ligação / abordagem</div>
+    <div class="form-card">
+      <div class="form-title">📞 Nova abordagem</div>
+      <div class="field">
+        <label class="field-label">Empresa / contato</label>
+        <input type="text" id="f-empresa" placeholder="Ex: Igreja Renovação, Colégio São Paulo...">
+      </div>
+      <div class="field">
+        <label class="field-label">Tipo</label>
+        <div class="radio-row" id="rg-tipo">
+          <span class="radio-opt" onclick="pick('tipo',this)">Ligação</span>
+          <span class="radio-opt" onclick="pick('tipo',this)">Presencial</span>
+          <span class="radio-opt" onclick="pick('tipo',this)">WhatsApp</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Falou com o responsável?</label>
+        <div class="radio-row" id="rg-resp">
+          <span class="radio-opt" onclick="pick('resp',this)">Sim</span>
+          <span class="radio-opt" onclick="pick('resp',this)">Não — retornar</span>
+          <span class="radio-opt" onclick="pick('resp',this)">Não — sem interesse</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Usou IA para se preparar antes?</label>
+        <div class="radio-row" id="rg-ia">
+          <span class="radio-opt" onclick="pick('ia',this)">Sim ✅</span>
+          <span class="radio-opt" onclick="pick('ia',this)">Não ❌</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Interesse percebido</label>
+        <div class="radio-row" id="rg-inter">
+          <span class="radio-opt" onclick="pick('inter',this)">🔥 Alto</span>
+          <span class="radio-opt" onclick="pick('inter',this)">🟡 Médio</span>
+          <span class="radio-opt" onclick="pick('inter',this)">❄️ Baixo</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">O que gerou interesse?</label>
+        <div class="radio-row" id="rg-gerou" style="margin-bottom:7px">
+          <span class="radio-opt" onclick="pick('gerou',this)">Faturamento</span>
+          <span class="radio-opt" onclick="pick('gerou',this)">Alerta WhatsApp</span>
+          <span class="radio-opt" onclick="pick('gerou',this)">Economia adm</span>
+          <span class="radio-opt" onclick="pick('gerou',this)">Abordagem orgânica</span>
+          <span class="radio-opt" onclick="pick('gerou',this)">Outro</span>
+        </div>
+        <textarea id="f-gerou" placeholder="Detalhe..." style="min-height:45px"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Objeção principal</label>
+        <div class="radio-row" id="rg-obj">
+          <span class="radio-opt" onclick="pick('obj',this)">Preço</span>
+          <span class="radio-opt" onclick="pick('obj',this)">Não viu valor</span>
+          <span class="radio-opt" onclick="pick('obj',this)">Concorrente</span>
+          <span class="radio-opt" onclick="pick('obj',this)">Sem case</span>
+          <span class="radio-opt" onclick="pick('obj',this)">Responsável ausente</span>
+          <span class="radio-opt" onclick="pick('obj',this)">Nenhuma</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Próximo passo definido?</label>
+        <div class="radio-row" id="rg-prox">
+          <span class="radio-opt" onclick="pick('prox',this)">Reunião agendada ✅</span>
+          <span class="radio-opt" onclick="pick('prox',this)">Retornar em breve</span>
+          <span class="radio-opt" onclick="pick('prox',this)">Sem próximo passo ❌</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">O que faria diferente?</label>
+        <textarea id="f-dif" placeholder="Seja honesto. Essa é a parte mais importante."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Nota da abordagem (1–10)</label>
+        <div class="radio-row" id="rg-nota">
+          <span class="radio-opt" onclick="pick('nota',this)">1</span><span class="radio-opt" onclick="pick('nota',this)">2</span>
+          <span class="radio-opt" onclick="pick('nota',this)">3</span><span class="radio-opt" onclick="pick('nota',this)">4</span>
+          <span class="radio-opt" onclick="pick('nota',this)">5</span><span class="radio-opt" onclick="pick('nota',this)">6</span>
+          <span class="radio-opt" onclick="pick('nota',this)">7</span><span class="radio-opt" onclick="pick('nota',this)">8</span>
+          <span class="radio-opt" onclick="pick('nota',this)">9</span><span class="radio-opt" onclick="pick('nota',this)">10</span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveLog()">Salvar registro</button>
+    </div>
+    <div class="section-label" style="margin-top:18px">Histórico</div>
+    <div id="log-list"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro ainda.</div></div></div>
+  </div>
+
+  <!-- FRAY -->
+  <div id="fray" class="section">
+    <div class="fray-rule">
+      <div class="fray-rule-title">⚠️ Regra do curso</div>
+      <div class="fray-rule-text">
+        Início: <strong>10/06 (quarta-feira)</strong> — Júlio sem computador até lá.<br>
+        Ritmo: um módulo por semana, assistido por conta.<br>
+        Entrega da atividade: toda <strong>quarta-feira</strong>.<br>
+        Avaliação Marcelo: toda <strong>quarta-feira</strong>.<br><br>
+        1ª vez sem entrega → Marcelo não corrige. Segue.<br>
+        2ª vez sem entrega → <strong>perde acesso ao curso. Parceria em revisão.</strong>
+      </div>
+    </div>
+
+    <div class="strike-counter">
+      <div>
+        <div class="strike-label">Falhas de entrega</div>
+        <div class="strikes-display" id="strike-dots"></div>
+      </div>
+      <div class="strike-btns">
+        <button class="strike-btn" onclick="addStrike()">+ Falha</button>
+        <button class="strike-btn" onclick="remStrike()">− Remover</button>
+      </div>
+    </div>
+
+    <div class="section-label">10 módulos · avaliados por Marcelo toda segunda</div>
+    <div id="fray-list"></div>
+  </div>
+
+  <!-- SOCIEDADE -->
+  <div id="sociedade" class="section">
+    <div class="section-label">Critérios de sociedade — sem subjetividade</div>
+
+    <div class="vendas-counter">
+      <div class="counter-val" id="v-count">0</div>
+      <div class="counter-label">vendas fechadas registradas</div>
+      <div class="counter-btns">
+        <button class="btn-add" onclick="addV()">+ Registrar venda</button>
+        <button class="btn-rem" onclick="remV()">− Remover</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="prog-row">
+        <div class="prog-label"><span>Degrau 1 — 2 vendas</span><strong id="v-d1">0/2</strong></div>
+        <div class="prog-track"><div class="prog-fill2" id="bar-d1" style="width:0%"></div></div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-label"><span>Degrau 2 — 5 vendas</span><strong id="v-d2">0/5</strong></div>
+        <div class="prog-track"><div class="prog-fill2" id="bar-d2" style="width:0%"></div></div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-label"><span>Degrau 3 — 10 vendas</span><strong id="v-d3">0/10</strong></div>
+        <div class="prog-track"><div class="prog-fill2" id="bar-d3" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">O que cada degrau libera</div>
+
+    <div class="soc-step" id="soc1">
+      <div class="soc-header">
+        <div class="step-circle c-active">1</div>
+        <div>
+          <div class="soc-name">2 vendas fechadas</div>
+          <div class="soc-desc">Qualquer cliente. Contrato assinado e pago. Sem desculpa.</div>
+          <div class="soc-reward">→ Título de sócio comercial (sem % ainda)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="soc-step" id="soc2">
+      <div class="soc-header">
+        <div class="step-circle c-locked">2</div>
+        <div>
+          <div class="soc-name">5 vendas + 60 dias de contrato ativo</div>
+          <div class="soc-desc">Clientes ativos, não cancelados. Operação saudável.</div>
+          <div class="soc-reward">→ 5% da Neurofeel</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="soc-step" id="soc3">
+      <div class="soc-header">
+        <div class="step-circle c-locked">3</div>
+        <div>
+          <div class="soc-name">10 vendas + 6 meses de operação</div>
+          <div class="soc-desc">Consistência provada. Vende sem depender do Marcelo.</div>
+          <div class="soc-reward">→ Negociação de até 10% da Neurofeel</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var S=localStorage;
+var tasks=JSON.parse(S.getItem('nf2-tasks')||'{}');
+var logs=JSON.parse(S.getItem('nf2-logs')||'[]');
+var frayG=JSON.parse(S.getItem('nf2-fray')||'{}');
+var vendas=parseInt(S.getItem('nf2-vendas')||'0');
+var strikes=parseInt(S.getItem('nf2-strikes')||'0');
+var picks={};
+
+document.getElementById('top-date').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+
+function switchTab(id,btn){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='fray'){renderFray();renderStrikes();}
+  if(id==='checklist')renderLogs();
+  if(id==='sociedade')renderSoc();
+}
+
+function toggleCard(h){
+  var b=h.nextElementSibling;
+  var c=h.querySelector('.chevron');
+  var open=b.style.display!=='none';
+  b.style.display=open?'none':'block';
+  c.style.transform=open?'':'rotate(90deg)';
+}
+
+function toggleTask(el,week){
+  var box=el.querySelector('.task-box');
+  var txt=el.querySelector('.task-text');
+  var key=week+'||'+txt.innerText.trim();
+  if(box.classList.contains('done')){box.classList.remove('done');txt.classList.remove('done');delete tasks[key];}
+  else{box.classList.add('done');txt.classList.add('done');tasks[key]=1;}
+  S.setItem('nf2-tasks',JSON.stringify(tasks));
+  updateStats();
+  updateWeekProg(week);
+}
+
+function updateStats(){
+  var all=document.querySelectorAll('.task-box').length;
+  var done=document.querySelectorAll('.task-box.done').length;
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('stat-pct').textContent=all?Math.round(done/all*100)+'%':'0%';
+  document.getElementById('stat-vendas').textContent=vendas;
+}
+
+function updateWeekProg(week){
+  var bar=document.querySelector('[data-week="'+week+'"]');
+  if(!bar)return;
+  var body=bar.closest('.card-body');
+  if(!body)return;
+  var all=body.querySelectorAll('.task-box').length;
+  var done=body.querySelectorAll('.task-box.done').length;
+  var pct=all?Math.round(done/all*100):0;
+  bar.style.width=pct+'%';
+  var el=document.getElementById('prog-'+week);
+  if(el)el.textContent=pct+'%';
+}
+
+function restoreTasks(){
+  document.querySelectorAll('.task').forEach(function(el){
+    var week=el.getAttribute('onclick').match(/'([^']+)'\)$/);
+    if(!week)return;
+    var txt=el.querySelector('.task-text');
+    var key=week[1]+'||'+txt.innerText.trim();
+    if(tasks[key]){
+      el.querySelector('.task-box').classList.add('done');
+      txt.classList.add('done');
+    }
+  });
+  ['s1','s2','s3','s4','rotina'].forEach(updateWeekProg);
+  updateStats();
+}
+
+function pick(group,el){
+  document.querySelectorAll('#rg-'+group+' .radio-opt').forEach(function(b){b.classList.remove('sel')});
+  el.classList.add('sel');
+  picks[group]=el.textContent.trim();
+}
+
+function saveLog(){
+  var empresa=document.getElementById('f-empresa').value.trim()||'Sem nome';
+  var entry={
+    date:new Date().toLocaleDateString('pt-BR'),
+    empresa:empresa,
+    tipo:picks['tipo']||'—',resp:picks['resp']||'—',
+    ia:picks['ia']||'—',inter:picks['inter']||'—',
+    gerou:picks['gerou']||'—',
+    gerouD:document.getElementById('f-gerou').value.trim(),
+    obj:picks['obj']||'—',prox:picks['prox']||'—',
+    dif:document.getElementById('f-dif').value.trim(),
+    nota:picks['nota']||'—'
+  };
+  logs.unshift(entry);
+  S.setItem('nf2-logs',JSON.stringify(logs));
+  document.getElementById('f-empresa').value='';
+  document.getElementById('f-gerou').value='';
+  document.getElementById('f-dif').value='';
+  picks={};
+  document.querySelectorAll('.radio-opt').forEach(function(b){b.classList.remove('sel')});
+  renderLogs();
+  alert('Registro salvo! ✅');
+}
+
+function renderLogs(){
+  var c=document.getElementById('log-list');
+  if(!logs.length){c.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro ainda.</div></div>';return;}
+  var html='';
+  logs.forEach(function(l,i){
+    var bc=l.inter.includes('Alto')?'badge-hot':l.inter.includes('Médio')?'badge-mid':'badge-cold';
+    html+='<div class="log-item"><div class="log-top"><div class="log-empresa">'+l.empresa+'</div><div class="log-date">'+l.date+'</div></div>';
+    html+='<div class="log-detail"><span class="log-badge '+bc+'">'+l.inter+'</span><strong>'+l.tipo+'</strong> · IA: '+l.ia+'<br>';
+    html+='Gerou: '+l.gerou;if(l.gerouD)html+=' — '+l.gerouD;
+    html+='<br>Objeção: '+l.obj+' · Próximo: '+l.prox;
+    if(l.dif)html+='<br>⚡ <em>'+l.dif+'</em>';
+    html+='<br>Nota: <strong>'+l.nota+'</strong></div>';
+    html+='<div style="text-align:right;margin-top:6px"><span onclick="delLog('+i+')" style="font-size:11px;color:var(--text-3);cursor:pointer">apagar</span></div></div>';
+  });
+  c.innerHTML=html;
+}
+
+function delLog(i){if(confirm('Apagar?')){logs.splice(i,1);S.setItem('nf2-logs',JSON.stringify(logs));renderLogs();}}
+
+var frayMods=[
+  {t:'Módulo 1 — Presença e voz',p:'A partir de 10/06 · entrega: Qua seguinte'},
+  {t:'Módulo 2 — Comunicação persuasiva',p:'Semana 2 · entrega: Qua seguinte'},
+  {t:'Módulo 3 — Linguagem corporal',p:'Semana 3 · entrega: Qua seguinte'},
+  {t:'Módulo 4 — Storytelling',p:'Semana 4 · entrega: Qua seguinte'},
+  {t:'Módulo 5 — Rapport e conexão',p:'Semana 5 · entrega: Qua seguinte'},
+  {t:'Módulo 6 — Gestão do nervosismo',p:'Semana 6 · entrega: Qua seguinte'},
+  {t:'Módulo 7 — Apresentações de impacto',p:'Semana 7 · entrega: Qua seguinte'},
+  {t:'Módulo 8 — Oratória avançada',p:'Semana 8 · entrega: Qua seguinte'},
+  {t:'Módulo 9 — Pitch e fechamento',p:'Semana 9 · entrega: Qua seguinte'},
+  {t:'Módulo 10 — Presença digital e autoridade',p:'Semana 10 · entrega: Qua seguinte'},
+];
+
+function renderFray(){
+  var html='';
+  frayMods.forEach(function(m,i){
+    var g=frayG[i]||'';
+    html+='<div class="fray-item"><div class="fray-top"><div><div class="fray-title">'+m.t+'</div><div class="fray-prazo">'+m.p+'</div></div>';
+    html+='<span class="status-badge '+(g?'s-done':'s-pend')+'">'+(g?'Nota '+g:'Pendente')+'</span></div>';
+    html+='<div class="fray-bottom"><label>Nota Marcelo:</label>';
+    html+='<select class="grade-sel" onchange="saveGrade('+i+',this.value)">';
+    html+='<option value="">—</option>';
+    ['5','6','7','8','9','10'].forEach(function(n){html+='<option'+(g===n?' selected':'')+'>'+n+'</option>';});
+    html+='</select></div></div>';
+  });
+  document.getElementById('fray-list').innerHTML=html;
+}
+
+function saveGrade(i,v){frayG[i]=v;S.setItem('nf2-fray',JSON.stringify(frayG));renderFray();}
+
+function addStrike(){
+  strikes=Math.min(strikes+1,2);
+  S.setItem('nf2-strikes',strikes);
+  renderStrikes();
+  if(strikes===1)alert('1ª falha registrada. Marcelo não corrige desta vez. Próxima = perde o curso.');
+  if(strikes>=2)alert('🚨 2ª falha. Júlio perde acesso ao curso. Parceria em revisão.');
+}
+function remStrike(){strikes=Math.max(strikes-1,0);S.setItem('nf2-strikes',strikes);renderStrikes();}
+function renderStrikes(){
+  var el=document.getElementById('strike-dots');
+  if(!el)return;
+  var html='';
+  for(var i=0;i<2;i++){html+='<div class="strike-dot'+(i<strikes?' red':'')+'"></div>';}
+  el.innerHTML=html;
+}
+
+function addV(){vendas=Math.min(vendas+1,20);S.setItem('nf2-vendas',vendas);renderSoc();updateStats();}
+function remV(){vendas=Math.max(vendas-1,0);S.setItem('nf2-vendas',vendas);renderSoc();updateStats();}
+
+function renderSoc(){
+  document.getElementById('v-count').textContent=vendas;
+  var d1=Math.min(vendas,2),d2=Math.min(vendas,5),d3=Math.min(vendas,10);
+  document.getElementById('v-d1').textContent=d1+'/2';
+  document.getElementById('v-d2').textContent=d2+'/5';
+  document.getElementById('v-d3').textContent=d3+'/10';
+  document.getElementById('bar-d1').style.width=Math.round(d1/2*100)+'%';
+  document.getElementById('bar-d2').style.width=Math.round(d2/5*100)+'%';
+  document.getElementById('bar-d3').style.width=Math.round(d3/10*100)+'%';
+  document.getElementById('soc1').className='soc-step'+(vendas>=2?' achieved':'');
+  document.getElementById('soc2').className='soc-step'+(vendas>=5?' achieved':'');
+  document.getElementById('soc3').className='soc-step'+(vendas>=10?' achieved':'');
+  document.querySelector('#soc2 .step-circle').className='step-circle '+(vendas>=2?'c-active':'c-locked');
+  document.querySelector('#soc3 .step-circle').className='step-circle '+(vendas>=5?'c-active':'c-locked');
+}
+
+restoreTasks();
+renderSoc();
+renderStrikes();
+</script>
+</body>
+</html>
